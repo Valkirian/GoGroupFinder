@@ -21,7 +21,8 @@ type User struct {
 
 type OutPutData struct {
 	UserPrincipalName	string
-	Group				string
+	DisplayName		string
+	Group			string
 }
 
 var output []OutPutData = []OutPutData{}
@@ -41,7 +42,7 @@ func main() {
 
 	for k, v := range groups {
 		for _, user := range v {
-			output = append(output, OutPutData{UserPrincipalName: user.UserPrincipalName,Group:k})
+			output = append(output, OutPutData{UserPrincipalName: user.UserPrincipalName,DisplayName: user.DisplayName, Group:k})
 		}
 	}
 
