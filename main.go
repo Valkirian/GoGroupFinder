@@ -30,8 +30,8 @@ var userstocompare []User = []User{}
 var group chan map[string][]User = make(chan map[string][]User)
 
 func main() {
-	GetUsersToFind("C:\\Users\\rachid.moyse\\OneDrive - Tivit\\Documentos\\VPN Groups\\Grupos a Revisar")
-	GetUserstoCompare("C:\\Users\\rachid.moyse\\OneDrive - Tivit\\Documentos\\VPN Groups")
+	GetUsersToFind("") //Path donde estan los grupos que verificaras que existen los usuarios
+	GetUserstoCompare("") //Path donde estan los grupos de donde se obtendran los usuarios para verificar que existan en los otros grupos
 
 	groups, ok := <- group
 	if !ok {
