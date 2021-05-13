@@ -21,17 +21,16 @@ type User struct {
 
 type OutPutData struct {
 	UserPrincipalName	string
+	DisplayName			string
 	Group				string
 }
 
 var output []OutPutData = []OutPutData{}
-var userstofind []User = []User{}
-var userstocompare []User = []User{}
+var usersandgroups []User = []User{}
 var group chan map[string][]User = make(chan map[string][]User)
 
 func main() {
-	GetUsersToFind("C:\\Users\\rachid.moyse\\OneDrive - Tivit\\Documentos\\VPN Groups\\Grupos a Revisar")
-	GetUserstoCompare("C:\\Users\\rachid.moyse\\OneDrive - Tivit\\Documentos\\VPN Groups")
+	GetUsersAndGroups("C:\\Users\\rachid.moyse\\OneDrive - Tivit\\Documentos\\VPN Groups")
 
 	groups, ok := <- group
 	if !ok {
@@ -41,7 +40,7 @@ func main() {
 
 	for k, v := range groups {
 		for _, user := range v {
-			output = append(output, OutPutData{UserPrincipalName: user.UserPrincipalName,Group:k})
+			output = append(output, OutPutData{UserPrincipalName: user.UserPrincipalName, DisplayName: user.DisplayName, Group:k})
 		}
 	}
 
@@ -56,7 +55,7 @@ func main() {
 	file.WriteString(cvsContent)
 }
 
-func GetUsersToFind(path string) {
+func GetUsersAndGroups(path string) {
 	//Finding the CSV files in the path given
 	path_file := path + "\\*.csv"
 	files, err := filepath.Glob(path_file)
@@ -83,49 +82,12 @@ func GetUsersToFind(path string) {
 			panic(err)
 		}
 		defer clientfile.Close()
-		if err := gocsv.UnmarshalFile(clientfile, &userstofind); err != nil {
+		if err := gocsv.UnmarshalFile(clientfile, &usersandgroups); err != nil {
 			panic(err)
 		}
 
 		//Adding the group to the users
-		g[filepath.Base(file)] = userstofind
-	}
-	go func() {
-		group <- g
-	}()
-}
-
-func GetUserstoCompare(path string) {
-	//Finding the CSV files in the path given
-	path_file := path + "\\*.csv"
-	files, err := filepath.Glob(path_file)
-	if err != nil {
-		log.Println("Error: ", err)
-	}
-
-	// Setting the Output File for logging
-	f, err := os.OpenFile("./Log.txt", os.O_RDWR | os.O_CREATE | os.O_APPEND, 0666)
-	if err != nil {
-		fmt.Println(err)
-	}
-	defer f.Close()
-	log.SetOutput(f)
-
-	//Adding Map
-	g := make(map[string][]User)
-
-	//Parsing CSV Files to Slice of User Struct
-	for _, file := range files {
-		log.Println("Leyendo el archivo ", filepath.Base(file))
-		clientfile, err := os.OpenFile(string(file), os.O_RDWR|os.O_CREATE, 0777)
-		if err != nil {
-			panic(err)
-		}
-		defer clientfile.Close()
-		if err := gocsv.UnmarshalFile(clientfile, &userstocompare); err != nil {
-			panic(err)
-		}
-		g[filepath.Base(file)] = userstofind
+		g[filepath.Base(file)] = usersandgroups
 	}
 	go func() {
 		group <- g
